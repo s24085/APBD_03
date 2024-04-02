@@ -1,0 +1,6 @@
+namespace LegacyApp;
+
+interface IPerson
+{
+    
+}
