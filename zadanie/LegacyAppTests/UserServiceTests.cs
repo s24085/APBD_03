@@ -20,7 +20,22 @@ public class UserServiceTests
         Assert.Equal(false, result);
 
     }
+    [Fact]
+    public void AddUser_Should_Return_False_When_Age_Under_21()
+    {
+        //Arrange
+        string firstNAme = "John";
+        string lastName = "Doe";
+        DateTime dob = new DateTime(2003, 12, 3);
+        int clientId = 1;
+        string email = "j@doe.pl";
+        var service = new UserService();
+        //Act
+        bool result = service.AddUser(firstNAme, lastName, email, dob, clientId);
+        //Asset
+        Assert.Equal(false, result);
 
+    }
     [Fact]
     public void AddUser_Should_Return_False_When_FirstName_Empty()
     {
