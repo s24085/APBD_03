@@ -1,5 +1,6 @@
 using LegacyApp;
 
+
 namespace LegacyAppTests;
 
 public class UserServiceTests
@@ -17,7 +18,7 @@ public class UserServiceTests
         //Act
         bool result = service.AddUser(firstNAme, lastName, email, dob, clientId);
         //Asset
-        Assert.Equal(false, result);
+        Assert.False(result);
 
     }
 
@@ -34,7 +35,7 @@ public class UserServiceTests
         //Act
         bool result = service.AddUser(firstNAme, lastName, email, dob, clientId);
 
-        Assert.Equal(true, result);
+        Assert.True(result);
 
     }
 
@@ -51,7 +52,7 @@ public class UserServiceTests
         //Act
         bool result = service.AddUser(firstNAme, lastName, email, dob, clientId);
         //Asset
-        Assert.Equal(false, result);
+        Assert.False(result);
 
     }
 
@@ -67,7 +68,7 @@ public class UserServiceTests
 
         bool result = service.AddUser(firstNAme, lastName, email, dob, clientId);
 
-        Assert.Equal(false, result);
+        Assert.False(result);
     }
 
     [Fact]
@@ -78,7 +79,7 @@ public class UserServiceTests
 
         bool result = service.AddUser(null, "Doe", "w@w.com", new DateTime(1990, 2, 3), 1);
 
-        Assert.Equal(false, result);
+        Assert.False(result);
     }
 
     [Fact]
@@ -93,7 +94,7 @@ public class UserServiceTests
 
         bool result = service.AddUser(firstNAme, lastName, email, dob, clientId);
 
-        Assert.Equal(false, result);
+        Assert.False(result);
     }
 
     [Fact]
@@ -103,7 +104,7 @@ public class UserServiceTests
 
         bool result = service.AddUser("John", null, "w@w.com", new DateTime(1990, 2, 3), 1);
 
-        Assert.Equal(false, result);
+        Assert.False(result);
     }
 
     [Fact]
@@ -112,25 +113,25 @@ public class UserServiceTests
         var service = new UserService();
         var result = service.AddUser("John", "Doe", "jd@wp.pl", new DateTime(1999, 01, 01), 5);
 
-        Assert.Equal(true, result);
+        Assert.True(result);
     }
 
     [Fact]
-    public void Should_Return_True_When_Under500CreditLimit_And_Type_NormalClient()
+    public void Should_Return_False_When_Under500CreditLimit_And_Type_NormalClient()
     {
         var service = new UserService();
-        var result = service.AddUser("John", "Doe", "jd@wp.pl", new DateTime(1999, 01, 01), 1);
+        var result = service.AddUser("John", "Kowalski", "kowalski@wp.pl", new DateTime(1999, 01, 01), 1);
 
-        Assert.Equal(false, result);
+        Assert.False(result);
     }
 
-[Fact]
+    [Fact]
     public void Should_Return_True_When_Type_VeryImportantClient()
     {
         var service = new UserService();
         var result = service.AddUser("John", "Doe", "jd@wp.pl", new DateTime(1999, 01, 01), 2);
 
-        Assert.Equal(true, result);
+        Assert.True(result);
     }
 
     [Fact]
@@ -139,16 +140,36 @@ public class UserServiceTests
         var service = new UserService();
         var result = service.AddUser("John", "Doe", "jd@wp.pl", new DateTime(1999, 01, 01), 3);
 
-        Assert.Equal(true, result);
+        Assert.True(result);
     }
 
     [Fact]
-    public void Should_Return_FalseWithNoCreditLimit()
-        {
-            var service = new UserService();
-            var result = service.AddUser("John", "Doe", "jd@wp.pl", new DateTime(1999, 01, 01), 6);
+    public void Should_Return_True_When_LastName_In_Database_With_Diffrerent_ClientId()
+    {
+        var service = new UserService();
+        var result = service.AddUser("John", "Doe", "andrzejewicz@wp.pl", new DateTime(1999, 01, 01), 6);
 
-            Assert.Equal(true, result);
-        }
-    
+        Assert.True(result);
+    }
+    [Fact]
+    public void Should_Throw_Exception_With_LastName_In_Database_And_NoCreditLimit()
+    {
+        var service = new UserService();
+        Action act = () => service.AddUser("John", "Andrzejewicz", "andrzejewicz@wp.pl", new DateTime(1999, 01, 01), 6);
+
+        var exception = Assert.Throws<ArgumentException>(act);
+        Assert.Contains("Client Andrzejewicz does not exist", exception.Message);
+    }
+
+    [Fact]
+    public void Should_Throw_Exception_When_NoIdClient_In_Database()
+    {
+        var service = new UserService();
+        Action act = () => service.AddUser("John", "Doe", "jd@wp.pl", new DateTime(1999, 01, 01), 8);
+
+        var exception = Assert.Throws<ArgumentException>(act);
+
+       
+        Assert.Contains("User with id 8 does not exist in database", exception.Message);
+    }
 }
