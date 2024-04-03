@@ -4,29 +4,33 @@ namespace LegacyApp
 {
     public class UserService
     {
+        private IClientRepository _clientRepository;
+        private IUserCreditService _userCreditService;
+        private NameValidator nameValidator= new NameValidator();
+        private EmailValidaor emailValidator=new EmailValidaor();
+        private AgeValidator ageValidator= new AgeValidator();
+
+        [Obsolete]
+        public UserService()
+        {
+            _clientRepository = new ClientRepository();
+            _userCreditService = new UserCreditService();
+        }
+        public UserService(IClientRepository clientRepository, IUserCreditService creditService)
+        {
+            _clientRepository = clientRepository;
+            _userCreditService = creditService;
+            
+        }
+       
         public bool AddUser(string firstName, string lastName, string email, DateTime dateOfBirth, int clientId)
         {
-            if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
-            {
-                return false;
-            }
-
-            if (!email.Contains("@") && !email.Contains("."))
-            {
-                return false;
-            }
-
-            var now = DateTime.Now;
-            int age = now.Year - dateOfBirth.Year;
-            if (now.Month < dateOfBirth.Month || (now.Month == dateOfBirth.Month && now.Day < dateOfBirth.Day)) age--;
-
-            if (age < 21)
-            {
-                return false;
-            }
-
-            var clientRepository = new ClientRepository();
-            var client = clientRepository.GetById(clientId);
+            nameValidator.isNameNotEmptyNorNull(firstName, lastName);
+            emailValidator.isEmailFormatOk(email);
+            ageValidator.isOldEnough(dateOfBirth);
+            
+            
+            var client = _clientRepository.GetById(clientId);
 
             var user = new User
             {
@@ -53,9 +57,9 @@ namespace LegacyApp
             else
             {
                 user.HasCreditLimit = true;
-                using (var userCreditService = new UserCreditService())
+              
                 {
-                    int creditLimit = userCreditService.GetCreditLimit(user.LastName, user.DateOfBirth);
+                    int creditLimit = _userCreditService.GetCreditLimit(user.LastName, user.DateOfBirth);
                     user.CreditLimit = creditLimit;
                 }
             }

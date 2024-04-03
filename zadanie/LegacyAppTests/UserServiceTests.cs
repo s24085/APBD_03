@@ -144,7 +144,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public void Should_Return_True_When_LastName_In_Database_With_Diffrerent_ClientId()
+    public void Should_Return_True_When_LastName_In_Database_With_Different_ClientId()
     {
         var service = new UserService();
         var result = service.AddUser("John", "Doe", "andrzejewicz@wp.pl", new DateTime(1999, 01, 01), 6);
