@@ -9,7 +9,7 @@ namespace LegacyApp
         private NameValidator nameValidator= new NameValidator();
         private EmailValidaor emailValidator=new EmailValidaor();
         private AgeValidator ageValidator= new AgeValidator();
-
+        private CreditScoreValidator creditScoreValidator=new CreditScoreValidator();
         [Obsolete]
         public UserService()
         {
@@ -25,11 +25,13 @@ namespace LegacyApp
        
         public bool AddUser(string firstName, string lastName, string email, DateTime dateOfBirth, int clientId)
         {
-            nameValidator.isNameNotEmptyNorNull(firstName, lastName);
-            emailValidator.isEmailFormatOk(email);
-            ageValidator.isOldEnough(dateOfBirth);
-            
-            
+            if (!nameValidator.isNameNotEmptyNorNull(firstName, lastName) ||
+                !emailValidator.isEmailFormatOk(email) ||
+                !ageValidator.isOldEnough(dateOfBirth))
+            {
+                return false;
+            }
+
             var client = _clientRepository.GetById(clientId);
 
             var user = new User
@@ -38,33 +40,11 @@ namespace LegacyApp
                 DateOfBirth = dateOfBirth,
                 EmailAddress = email,
                 FirstName = firstName,
-                LastName = lastName
+                LastName = lastName,
+                HasCreditLimit = client.Type != "VeryImportantClient"
             };
 
-            if (client.Type == "VeryImportantClient")
-            {
-                user.HasCreditLimit = false;
-            }
-            else if (client.Type == "ImportantClient")
-            {
-                using (var userCreditService = new UserCreditService())
-                {
-                    int creditLimit = userCreditService.GetCreditLimit(user.LastName, user.DateOfBirth);
-                    creditLimit = creditLimit * 2;
-                    user.CreditLimit = creditLimit;
-                }
-            }
-            else
-            {
-                user.HasCreditLimit = true;
-              
-                {
-                    int creditLimit = _userCreditService.GetCreditLimit(user.LastName, user.DateOfBirth);
-                    user.CreditLimit = creditLimit;
-                }
-            }
-
-            if (user.HasCreditLimit && user.CreditLimit < 500)
+            if (!creditScoreValidator.IsCreditScoreValid(user.LastName, user.DateOfBirth, user.HasCreditLimit, client))
             {
                 return false;
             }
