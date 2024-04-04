@@ -4,17 +4,7 @@ namespace LegacyApp;
 
 public class CreditScoreValidator
 {
-    private readonly IUserCreditService _userCreditService;
-
-    public CreditScoreValidator(IUserCreditService userCreditService)
-    {
-        _userCreditService = userCreditService;
-    }
-
-    public CreditScoreValidator()
-    {
-        _userCreditService = new UserCreditService();
-    }
+    private readonly UserCreditService _userCreditService = new UserCreditService();
 
     public bool IsCreditScoreValid(string lastName, DateTime dateOfBirth, bool hasCreditLimit, Client client)
     {
@@ -23,7 +13,7 @@ public class CreditScoreValidator
             return true;
         }
 
-        int creditLimit = _userCreditService.GetCreditLimit(lastName, dateOfBirth);
+        var creditLimit = _userCreditService.GetCreditLimit(lastName, dateOfBirth);
 
         if (client.Type == "ImportantClient")
         {

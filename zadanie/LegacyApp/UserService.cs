@@ -2,49 +2,34 @@
 
 namespace LegacyApp
 {
-    public class UserService
+    public class UserService(IClientRepository clientRepository, IUserCreditService creditService)
     {
-        private IClientRepository _clientRepository;
-        private IUserCreditService _userCreditService;
-        private NameValidator nameValidator= new NameValidator();
-        private EmailValidaor emailValidator=new EmailValidaor();
-        private AgeValidator ageValidator= new AgeValidator();
-        private CreditScoreValidator creditScoreValidator=new CreditScoreValidator();
-        [Obsolete]
-        public UserService()
+        public IUserCreditService CreditService { get; } = creditService;
+        private readonly CreditScoreValidator _creditScoreValidator=new CreditScoreValidator();
+        [Obsolete("Obsolete")]
+        public UserService() : this(new ClientRepository(), new UserCreditService())
         {
-            _clientRepository = new ClientRepository();
-            _userCreditService = new UserCreditService();
         }
-        public UserService(IClientRepository clientRepository, IUserCreditService creditService)
-        {
-            _clientRepository = clientRepository;
-            _userCreditService = creditService;
-            
-        }
-       
+
         public bool AddUser(string firstName, string lastName, string email, DateTime dateOfBirth, int clientId)
         {
-            if (!nameValidator.isNameNotEmptyNorNull(firstName, lastName) ||
-                !emailValidator.isEmailFormatOk(email) ||
-                !ageValidator.isOldEnough(dateOfBirth))
+            if (!NameValidator.IsNameNotEmptyNorNull(firstName, lastName) ||
+                !EmailValidator.IsEmailFormatOk(email) ||
+                !AgeValidator.IsOldEnough(dateOfBirth))
             {
                 return false;
             }
 
-            var client = _clientRepository.GetById(clientId);
+            var client = clientRepository.GetById(clientId);
 
             var user = new User
             {
-                Client = client,
                 DateOfBirth = dateOfBirth,
-                EmailAddress = email,
-                FirstName = firstName,
                 LastName = lastName,
                 HasCreditLimit = client.Type != "VeryImportantClient"
             };
 
-            if (!creditScoreValidator.IsCreditScoreValid(user.LastName, user.DateOfBirth, user.HasCreditLimit, client))
+            if (!_creditScoreValidator.IsCreditScoreValid(user.LastName, user.DateOfBirth, user.HasCreditLimit, client))
             {
                 return false;
             }

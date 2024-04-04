@@ -4,7 +4,7 @@ namespace LegacyApp;
 
 public class AgeValidator
 {
-    public bool isOldEnough(DateTime dateOfBirth)
+    public static bool IsOldEnough(DateTime dateOfBirth)
     {
         var now = DateTime.Now;
         int age = now.Year - dateOfBirth.Year;

@@ -30,11 +30,11 @@ namespace LegacyApp
         /// <returns>Client's credit limit</returns>
         public int GetCreditLimit(string lastName, DateTime dateOfBirth)
         {
-            int randomWaitingTime = new Random().Next(3000);
+            var randomWaitingTime = new Random().Next(3000);
             Thread.Sleep(randomWaitingTime);
 
-            if (_database.ContainsKey(lastName))
-                return _database[lastName];
+            if (_database.TryGetValue(lastName, out var value))
+                return value;
 
             throw new ArgumentException($"Client {lastName} does not exist");
         }
